@@ -65,3 +65,27 @@ pipeline {
 
                     kubectl rollout status deployment/backend
                     kubectl rollout status deployment/frontend
+                    '''
+                }
+            }
+        }
+
+        stage('Vérification') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh 'kubectl get pods'
+                    sh 'kubectl get svc'
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Une erreur est survenue."
+        }
+        success {
+            echo "✅ Pipeline exécutée avec succès !"
+        }
+    }
+}
