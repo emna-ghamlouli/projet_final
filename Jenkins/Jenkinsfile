@@ -52,6 +52,19 @@ kubectl delete pod mysql-test
             }
         }
     }
+    stage('Vérifier données MySQL') {
+  steps {
+    withKubeConfig([credentialsId: 'KUBECONFIG_CREDENTIALS']) {
+      sh '''
+        # Lancer un pod temporaire pour interroger la base
+        kubectl run mysql-check --rm -i --tty \
+          --image=mysql:5.7 \
+          --restart=Never \
+          -- mysql -hmysql -uroot -pmysql -e "USE mydb; SELECT * FROM utilisateur;"
+      '''
+    }
+  }
+}
 
     post {
         success {
