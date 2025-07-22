@@ -35,12 +35,12 @@ pipeline {
             steps {
                withDockerRegistry(credentialsId: 'Docker', url: '') {
                
-                        sh 'docker build -t ghamlouli/demo:latest'
+                       sh 'docker build -t ghamlouli/demo:latest ./demo'
 
-                        sh 'docker push ghamlouli/demo:latest'
+                        sh 'docker push ghamlouli/demo:latest ./demo'
 
-                     sh 'docker build -t ghamlouli/frontend'
-                        sh 'docker push ghamlouli/frontend'
+                     sh 'docker build -t ghamlouli/frontend:latest ./frontend'
+                        sh 'docker push ghamlouli/frontend:latest ./frontend'
                 }
             }
         }
