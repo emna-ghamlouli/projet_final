@@ -13,7 +13,6 @@ pipeline {
                     kubectl apply -f K8S/mysql-pv.yaml
                     kubectl apply -f K8S/mysql-pvc.yaml
                     kubectl apply -f K8S/mysql-deployment.yaml
-                    kubectl apply -f K8S/mysql-service.yaml
                     kubectl rollout status deployment/mysql
                     '''
                 }
