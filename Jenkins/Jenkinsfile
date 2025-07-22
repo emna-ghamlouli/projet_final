@@ -19,39 +19,39 @@ pipeline {
             }
         }
 
-stage('Tester la base') {
-  steps {
-    withKubeConfig([credentialsId: 'KUBECONFIG_CREDENTIALS']) {
-      sh '''
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: Pod
-        metadata:
-          name: mysql-test
-        spec:
-          containers:
-          - name: mysql
-            image: mysql:5.7
-            env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
-            command: ["sleep", "3600"]
-          restartPolicy: Never
-        EOF
+        stage('Tester la base') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh '''
+                    cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-test
+spec:
+  containers:
+  - name: mysql
+    image: mysql:5.7
+    env:
+    - name: MYSQL_ROOT_PASSWORD
+      value: root
+    command: ["sleep", "3600"]
+  restartPolicy: Never
+EOF
 
-        # Attendre que le pod soit prêt
-        kubectl wait --for=condition=Ready pod/mysql-test --timeout=60s
+                    # Attendre que le pod soit prêt
+                    kubectl wait --for=condition=Ready pod/mysql-test --timeout=60s
 
-        # Test de connexion
-        kubectl exec -i mysql-test -- mysql -h mysql -uroot -proot -e "SHOW DATABASES;"
+                    # Test de connexion
+                    kubectl exec -i mysql-test -- mysql -h mysql -uroot -proot -e "SHOW DATABASES;"
 
-        # Nettoyage
-        kubectl delete pod mysql-test
-      '''
+                    # Nettoyage
+                    kubectl delete pod mysql-test
+                    '''
+                }
+            }
+        }
     }
-  }
-}
-
 
     post {
         success {
@@ -62,4 +62,3 @@ stage('Tester la base') {
         }
     }
 }
-
