@@ -1,23 +1,91 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        KUBECONFIG_CREDENTIALS = credentials('kubernetes') // Kubeconfig enregistré dans Jenkins
+  environment {
+    KUBECONFIG_CREDENTIALS = credentials('kubernetes')
+  }
+
+  stages {
+
+    stage('Déployer MySQL') {
+      steps {
+        withKubeConfig([credentialsId: 'kubernetes']) {
+          sh '''
+            kubectl apply -f K8S/mysql-pv.yaml
+            kubectl apply -f K8S/mysql-pvc.yaml
+            kubectl apply -f K8S/mysql-deployment.yaml
+            kubectl rollout status deployment/mysql
+          '''
+        }
+      }
     }
 
-    stages {
-        stage('Déployer MySQL') {
-            steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                    kubectl apply -f K8S/mysql-pv.yaml
-                    kubectl apply -f K8S/mysql-pvc.yaml
-                    kubectl apply -f K8S/mysql-deployment.yaml
-                    kubectl rollout status deployment/mysql
-                    '''
-                }
-            }
+    stage('Build Backend') {
+      steps {
+        dir('backend') {
+          sh 'mvn clean install -DskipTests'
+          sh 'docker build -t backend-image .'
         }
+      }
+    }
 
-}
+    stage('Build Frontend') {
+      steps {
+        dir('frontend') {
+          sh 'npm install'
+          sh 'npm run build --prod'
+          sh 'docker build -t frontend-image .'
+        }
+      }
+    }
+
+    stage('Push Images (Optionnel si local)') {
+      when {
+        expression { return false } // Désactiver si tu utilises `kind` ou un cluster local
+      }
+      steps {
+        sh '''
+          docker tag backend-image myregistry/backend:latest
+          docker tag frontend-image myregistry/frontend:latest
+          docker push myregistry/backend:latest
+          docker push myregistry/frontend:latest
+        '''
+      }
+    }
+
+    stage('Déployer Backend + Frontend') {
+      steps {
+        withKubeConfig([credentialsId: 'kubernetes']) {
+          sh '''
+            kubectl apply -f K8S/backend-deployment.yaml
+            kubectl rollout status deployment/backend
+
+            kubectl apply -f K8S/frontend-deployment.yaml
+            kubectl rollout status deployment/frontend
+          '''
+        }
+      }
+    }
+
+    stage('Vérification') {
+      steps {
+        withKubeConfig([credentialsId: 'kubernetes']) {
+          sh '''
+            kubectl get pods
+            kubectl get svc
+          '''
+        }
+      }
+    }
+
+  }
+
+  post {
+    success {
+      echo '✅ Déploiement réussi sur Kubernetes.'
+    }
+    failure {
+      echo '❌ Une erreur est survenue.'
+    }
+  }
 }
