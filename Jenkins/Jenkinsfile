@@ -2,15 +2,14 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG_CREDENTIALS = credentials('kubernetes') // ton kubeconfig dans Jenkins
-        DOCKER_CREDENTIALS = credentials('Docker')          // ton identifiant Docker Hub dans Jenkins
+        DOCKER_CREDENTIALS = credentials('Docker') // Identifiants Docker
     }
 
     stages {
 
         stage('Déployer MySQL') {
             steps {
-                withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIALS}"]) {
+                withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
                     kubectl apply -f K8S/mysql-pv.yaml
                     kubectl apply -f K8S/mysql-pvc.yaml
@@ -44,49 +43,6 @@ pipeline {
                 script {
                     def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
-                    withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS}", url: '') {
-                        sh '''
-                        docker build -t ghamlouli/backend-image:${commit} -f demo/Dockerfile .
-                        docker build -t ghamlouli/frontend-image:${commit} -f frontend/Dockerfile .
-
-                        docker push ghamlouli/backend-image:${commit}
-                        docker push ghamlouli/frontend-image:${commit}
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Déployer Backend et Frontend') {
-            steps {
-                withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIALS}"]) {
-                    sh '''
-                    kubectl apply -f K8S/backend-deployment.yaml
-                    kubectl apply -f K8S/frontend-deployment.yaml
-
-                    kubectl rollout status deployment/backend
-                    kubectl rollout status deployment/frontend
-                    '''
-                }
-            }
-        }
-
-        stage('Vérification') {
-            steps {
-                withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIALS}"]) {
-                    sh 'kubectl get pods'
-                    sh 'kubectl get svc'
-                }
-            }
-        }
-    }
-
-    post {
-        failure {
-            echo "❌ Une erreur est survenue."
-        }
-        success {
-            echo "✅ Pipeline exécutée avec succès !"
-        }
-    }
-}
+                    withDockerRegistry(credentialsId: 'Docker', url: '') {
+                        sh """
+                        docke
