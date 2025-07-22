@@ -9,12 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git credentialsId: 'Jenkins', url: 'git@github.com:emna-ghamlouli/projet_final.git'
-            }
-        }
-
         stage('Build Backend') {
             steps {
                 dir('demo') {
