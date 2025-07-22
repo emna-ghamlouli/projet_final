@@ -22,6 +22,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('demo') {
+                        sh 'chmod +x mvnw' 
                     sh './mvnw clean install -DskipTests'
                     sh 'docker build -t backend-image .'
                 }
