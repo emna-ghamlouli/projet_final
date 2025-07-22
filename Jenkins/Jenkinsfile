@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG_CREDENTIALS = credentials('kubeconfig') // Kubeconfig enregistré dans Jenkins
+        KUBECONFIG_CREDENTIALS = credentials('kubernetes') // Kubeconfig enregistré dans Jenkins
     }
 
     stages {
         stage('Déployer MySQL') {
             steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
+                withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
                     kubectl apply -f K8S/mysql-pv.yaml
                     kubectl apply -f K8S/mysql-pvc.yaml
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Tester la base') {
             steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
+                withKubeConfig([credentialsId: 'kubernetes']) {
                     // Créer un pod temporaire MySQL client pour exécuter des requêtes
                     sh '''
                     cat <<EOF | kubectl apply -f -
