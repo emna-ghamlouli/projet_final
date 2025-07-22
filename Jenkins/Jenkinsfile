@@ -29,14 +29,20 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build --prod'
-                }
-            }
+       stage('Build Frontend') {
+    agent {
+        docker {
+            image 'node:18-alpine'
         }
+    }
+    steps {
+        dir('frontend') {
+            sh 'npm install'
+            sh 'npm run build --prod'
+        }
+    }
+}
+
 
         stage('Docker Build & Push') {
             steps {
