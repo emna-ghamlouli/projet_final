@@ -2,96 +2,83 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS = credentials('Docker') // Identifiants Docker
+        DOCKERHUB_CREDENTIALS = 'Docker'   // ID des credentials dans Jenkins
+        BACKEND_IMAGE = 'ghamlouli/myapp'
+        FRONTEND_IMAGE = 'ghamlouli/myfrontend'
     }
 
     stages {
-
-        stage('Déployer MySQL') {
+        stage('Clone Repository') {
             steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                    kubectl apply -f K8S/mysql-pv.yaml
-                    kubectl apply -f K8S/mysql-pvc.yaml
-                    kubectl apply -f K8S/mysql-deployment.yaml
-                    kubectl rollout status deployment/mysql
-                    '''
-                }
+                git 'git@github.com:emna-ghamlouli/projet_final.git'
             }
         }
 
         stage('Build Backend') {
-            steps {
-                dir('demo') {
+            dir('demo') {
+                steps {
                     sh 'chmod +x mvnw'
-                    sh './mvnw clean install -DskipTests'
+                    sh './mvnw clean package -DskipTests'
                 }
             }
         }
 
-       stage('Build Frontend') {
-    agent {
-        docker {
-            image 'node:18-alpine'
+        stage('Build Frontend') {
+            dir('frontend') {
+                steps {
+                    sh 'npm install'
+                    sh 'npm run build --prod'
+                }
+            }
         }
-    }
-    steps {
-        dir('frontend') {
-            sh 'npm install'
-            sh 'npm run build --prod'
-        }
-    }
-}
-
 
         stage('Docker Build & Push') {
             steps {
                 script {
-                    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-
-                    withDockerRegistry(credentialsId: 'Docker', url: '') {
-                        sh """
-                        docker build -t ghamlouli/backend-image:${commit} -f demo/Dockerfile .
-                        docker build -t ghamlouli/frontend-image:${commit} -f frontend/Dockerfile .
-
-                        docker push ghamlouli/backend-image:${commit}
-                        docker push ghamlouli/frontend-image:${commit}
-                        """
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CREDENTIALS}") {
+                        docker.build("${BACKEND_IMAGE}", 'demo').push('latest')
+                        docker.build("${FRONTEND_IMAGE}", 'frontend').push('latest')
                     }
                 }
             }
         }
 
-        stage('Déployer Backend et Frontend') {
+        stage('Deploy MySQL to K8s') {
             steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                    kubectl apply -f K8S/backend-deployment.yaml
-                    kubectl apply -f K8S/frontend-deployment.yaml
-
-                    kubectl rollout status deployment/backend
-                    kubectl rollout status deployment/frontend
-                    '''
-                }
+                sh '''
+                kubectl apply -f K8S/mysql-pv.yaml
+                kubectl apply -f K8S/mysql-pvc.yaml
+                kubectl apply -f K8S/mysql-deployment.yaml
+                kubectl rollout status deployment/mysql
+                '''
             }
         }
 
-        stage('Vérification') {
+        stage('Deploy Backend to K8s') {
             steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh 'kubectl get pods'
-                    sh 'kubectl get svc'
-                }
+                sh '''
+                kubectl apply -f K8S/backend-deployment.yaml
+                kubectl rollout status deployment/backend
+                '''
+            }
+        }
+
+        stage('Deploy Frontend to K8s') {
+            steps {
+                sh '''
+                kubectl apply -f K8S/frontend-deployment.yaml
+                kubectl rollout status deployment/frontend
+                '''
             }
         }
     }
 
     post {
-        failure {
-            echo "❌ Une erreur est survenue."
-        }
         success {
-            echo "✅ Pipeline exécutée avec succès !"
+            echo '🚀 Déploiement terminé avec succès !'
+        }
+        failure {
+            echo '❌ Échec du pipeline !'
         }
     }
 }
