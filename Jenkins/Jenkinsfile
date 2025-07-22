@@ -45,4 +45,23 @@ pipeline {
 
                     withDockerRegistry(credentialsId: 'Docker', url: '') {
                         sh """
-                        docke
+                        docker build -t ghamlouli/backend-image:${commit} -f demo/Dockerfile .
+                        docker build -t ghamlouli/frontend-image:${commit} -f frontend/Dockerfile .
+
+                        docker push ghamlouli/backend-image:${commit}
+                        docker push ghamlouli/frontend-image:${commit}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Déployer Backend et Frontend') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh '''
+                    kubectl apply -f K8S/backend-deployment.yaml
+                    kubectl apply -f K8S/frontend-deployment.yaml
+
+                    kubectl rollout status deployment/backend
+                    kubectl rollout status deployment/frontend
