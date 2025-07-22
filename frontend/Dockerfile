@@ -1,21 +1,20 @@
-# Étape 1 : Build de l'application Angular
+# Étape 1 : Build Angular
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copier les fichiers Angular
+# Copier package.json et installer les dépendances
+COPY package*.json ./
+RUN npm install
+
+# Copier le reste du code source
 COPY . .
 
-# Installer les dépendances et construire le projet
-RUN npm install && npm run build --prod
+# Build en mode production
+RUN npm run build --prod
 
-# Étape 2 : Serveur NGINX pour servir l'app
+# Étape 2 : Servir avec NGINX
 FROM nginx:alpine
-COPY --from=builder /app/dist/ /usr/share/nginx/html
-
-# Copier un fichier de config NGINX personnalisé (facultatif)
-# COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist/frontend /usr/share/nginx/html
 
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
-
