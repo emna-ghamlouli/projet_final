@@ -19,10 +19,10 @@ pipeline {
             }
         }
 
-stage('Tester la base') {
-    steps {
-        withKubeConfig([credentialsId: 'kubernetes']) {
-            sh '''
+        stage('Tester la base') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh '''
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Pod
@@ -48,9 +48,10 @@ kubectl exec -i mysql-test -- mysql -h mysql -uroot -pmysql -e "SHOW DATABASES;"
 # Nettoyage
 kubectl delete pod mysql-test
 '''
+                }
+            }
         }
     }
-}
 
     post {
         success {
