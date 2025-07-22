@@ -7,6 +7,10 @@ pipeline {
         FRONTEND_IMAGE = 'ghamlouli/myfrontend'     // Nom de l'image frontend
     }
 
+    tools {
+        nodejs 'NodeJS 18.7.0'                      // Utilise NodeJS installé via Jenkins
+    }
+
     stages {
 
         stage('Build Backend') {
