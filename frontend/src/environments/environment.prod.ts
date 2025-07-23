@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://backend.default.svc.cluster.local'
+  apiUrl: 'http://13.37.101.166:32618/'
 };
-
