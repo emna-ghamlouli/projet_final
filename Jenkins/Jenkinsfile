@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = 'Docker'            // ID des credentials Jenkins pour Docker Hub
-        BACKEND_IMAGE = 'ghamlouli/myapp'           // Nom de l'image backend
+        BACKEND_IMAGE = 'ghamlouli/demo'           // Nom de l'image backend
         FRONTEND_IMAGE = 'ghamlouli/myfrontend'     // Nom de l'image frontend
     }
 
@@ -44,6 +44,20 @@ pipeline {
                 }
             }
         }
+        stage('Docker Build&Push') {
+            steps {
+               withDockerRegistry(credentialsId: 'Docker', url: '') {
+               
+                       sh 'docker build -t ghamlouli/demo:latest ./demo'
+
+                        sh 'docker push ghamlouli/demo:latest ./demo'
+
+                     sh 'docker build -t ghamlouli/frontend:latest ./frontend'
+                        sh 'docker push ghamlouli/frontend:latest ./frontend'
+                }
+            }
+        }
+
 
         stage('Deploy Backend to K8s') {
             steps {
