@@ -30,19 +30,19 @@ pipeline {
                 }
             }
         }
-stage('Sonar_Scan') {
+stage('Sonar_Scan_backend') {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                         mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=projet4 \
-                        -Dsonar.projectName=projet4
+                        -Dsonar.projectKey=backend \
+                        -Dsonar.projectName=backend
                     '''
                 }
             }
         }
 
-        stage('Quality_Gate') {
+        stage('Quality_Gate_backend') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
@@ -52,22 +52,22 @@ stage('Sonar_Scan') {
             }
         }
 
-        stage('Nexus_Publish') {
+        stage('Nexus_Publish_backend') {
             steps {
                 nexusArtifactUploader artifacts: [
                     [
-                        artifactId: 'numeric',
+                        artifactId: 'demo',
                         classifier: '',
-                        file: 'target/numeric-0.0.1.jar',
+                        file: 'target/backend-0.0.1.jar',
                         type: 'jar'
                     ]
                 ],
                 credentialsId: 'nexus',
                 groupId: 'com.devops',
-                nexusUrl: '13.36.244.82:8081',
+                nexusUrl: '51.44.223.2:8081',
                 nexusVersion: 'nexus3',
                 protocol: 'http',
-                repository: 'compare-service',
+                repository: 'backend',
                 version: "0.0.1.${BUILD_NUMBER}"
             }
         }
