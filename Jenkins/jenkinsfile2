@@ -29,8 +29,7 @@ pipeline {
                         sh '''
                             ./mvnw clean verify sonar:sonar \
                               -Dsonar.projectKey=backend \
-                              -Dsonar.host.url=http://13.38.91.176:9000 \
-                              -Dsonar.login=sqp_d19059690ae2a75ad900cec356f012a8a07a57b7
+    
                         '''
                     }
                 }
