@@ -65,4 +65,33 @@ pipeline {
                     steps {
                         withKubeConfig([credentialsId: 'kubernetes']) {
                             sh '''
-                            k
+                            kubectl apply -f k8s/backend-deployment.yaml
+                            kubectl rollout status deployment/backend
+                            '''
+                        }
+                    }
+                }
+
+                stage('Deploy Frontend') {
+                    steps {
+                        withKubeConfig([credentialsId: 'kubernetes']) {
+                            sh '''
+                            kubectl apply -f k8s/frontend-deployment.yaml
+                            kubectl rollout status deployment/frontend
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Déploiement terminé avec succès !'
+        }
+        failure {
+            echo '❌ Échec du pipeline !'
+        }
+    }
+}
