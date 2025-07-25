@@ -9,7 +9,7 @@ pipeline {
 
     tools {
         nodejs 'NodeJS 18'
-  sonarQubeScanner 'SonarScanner'
+  sonarQubeScanner 'sonar-scanner'
     }
 
     stages {
