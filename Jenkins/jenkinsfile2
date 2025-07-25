@@ -30,6 +30,48 @@ pipeline {
                 }
             }
         }
+stage('Sonar_Scan') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=projet4 \
+                        -Dsonar.projectName=projet4
+                    '''
+                }
+            }
+        }
+
+        stage('Quality_Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        waitForQualityGate(abortPipeline: true)
+                    }
+                }
+            }
+        }
+
+        stage('Nexus_Publish') {
+            steps {
+                nexusArtifactUploader artifacts: [
+                    [
+                        artifactId: 'numeric',
+                        classifier: '',
+                        file: 'target/numeric-0.0.1.jar',
+                        type: 'jar'
+                    ]
+                ],
+                credentialsId: 'nexus',
+                groupId: 'com.devops',
+                nexusUrl: '13.36.244.82:8081',
+                nexusVersion: 'nexus3',
+                protocol: 'http',
+                repository: 'compare-service',
+                version: "0.0.1.${BUILD_NUMBER}"
+            }
+        }
+
 
         stage('Deploy MySQL to K8s') {
             steps {
