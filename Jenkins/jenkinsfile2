@@ -41,9 +41,12 @@ pipeline {
                 dir('demo') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            ./mvnw clean verify sonar:sonar \
-                            -Dsonar.projectKey=projet4\
-                            -Dsonar.projectName=backend
+mvn clean verify sonar:sonar \
+  -Dsonar.projectKey=backend \
+  -Dsonar.host.url=http://13.38.91.176:9000 \
+  -Dsonar.login=sqp_d25b3453676829bb796cfa9736d360e9a61d7e27
+  -Dsonar.projectName=backend
+                          
                         '''
                     }
                 }
@@ -56,26 +59,6 @@ pipeline {
                     script {
                         waitForQualityGate abortPipeline: true
                     }
-                }
-            }
-        }
-
-        stage('Publish to Nexus - Backend') {
-            steps {
-                dir('demo') {
-                    nexusArtifactUploader artifacts: [[
-                        artifactId: 'demo',
-                        classifier: '',
-                        file: 'target/*.jar',
-                        type: 'jar'
-                    ]],
-                    credentialsId: 'nexus',
-                    groupId: 'com.devops',
-                    nexusUrl: '13.38.91.176:8081',
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    repository: 'backend',
-                    version: "0.0.1.${BUILD_NUMBER}"
                 }
             }
         }
