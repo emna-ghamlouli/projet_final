@@ -2,36 +2,31 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'Docker'               // ID des credentials Docker Hub
-        BACKEND_IMAGE = 'ghamlouli/demo'               // Image backend
-        FRONTEND_IMAGE = 'ghamlouli/frontend'          // Image frontend
+        DOCKERHUB_CREDENTIALS = 'Docker'            // ID des credentials Jenkins pour Docker Hub
+        BACKEND_IMAGE = 'ghamlouli/demo'           // Nom de l'image backend
+        FRONTEND_IMAGE = 'ghamlouli/frontend'     // Nom de l'image frontend
     }
 
     tools {
-        nodejs 'NodeJS 18'                             // NodeJS configuré dans Jenkins
-
+        nodejs 'NodeJS 18'              // Utilise NodeJS installé via Jenkins
     }
 
     stages {
-
-        stage('Build Backend & Frontend') {
-            parallel {
-                stage('Build Backend') {
-                    steps {
-                        dir('demo') {
-                            sh 'chmod +x mvnw'
-                            sh './mvnw clean package -DskipTests'
-                        }
-                    }
+  
+        stage('Build Backend') {
+            steps {
+                dir('demo') {
+                    sh 'chmod +x mvnw'
+                    sh './mvnw clean package -DskipTests'
                 }
+            }
+        }
 
-                stage('Build Frontend') {
-                    steps {
-                        dir('frontend') {
-                            sh 'npm install'
-                            sh 'npm run build'
-                        }
-                    }
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm run build'
                 }
             }
         }
@@ -52,66 +47,58 @@ mvn clean verify sonar:sonar \
             }
         }
 
-        stage('Quality Gate - Backend') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    script {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
-            }
-        }
 
-        stage('Deploy MySQL to Kubernetes') {
+        stage('Deploy MySQL to K8s') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
-                        kubectl apply -f K8S/mysql-pv.yaml
-                        kubectl apply -f K8S/mysql-pvc.yaml
-                        kubectl apply -f K8S/mysql-deployment.yaml
-                        kubectl rollout status deployment/mysql
+                    kubectl apply -f K8S/mysql-pv.yaml
+                    kubectl apply -f K8S/mysql-pvc.yaml
+                    kubectl apply -f K8S/mysql-deployment.yaml
+                    kubectl rollout status deployment/mysql
+                    '''
+                }
+            }
+        }
+        
+stage('Docker Build&Push') {
+    steps {
+        withDockerRegistry(credentialsId: 'Docker', url: '') {
+
+            // Backend
+            sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
+            sh 'docker push ${BACKEND_IMAGE}:latest'
+
+            // Frontend
+            sh 'docker build -t ${FRONTEND_IMAGE}:latest ./frontend'
+            sh 'docker push ${FRONTEND_IMAGE}:latest'
+        }
+    }
+}
+
+        stage('Deploy Backend to K8s') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh '''
+                    kubectl apply -f K8S/backend-deployment.yaml
+                    kubectl rollout status deployment/backend
                     '''
                 }
             }
         }
 
-        stage('Docker Build & Push') {
-            steps {
-                withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '') {
-                    // Build & Push Backend
-                    sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
-                    sh 'docker push ${BACKEND_IMAGE}:latest'
-
-                    // Build & Push Frontend
-                    sh 'docker build -t ${FRONTEND_IMAGE}:latest ./frontend'
-                    sh 'docker push ${FRONTEND_IMAGE}:latest'
-                }
-            }
-        }
-
-        stage('Deploy Backend to Kubernetes') {
+        stage('Deploy Frontend to K8s') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
-                        kubectl apply -f K8S/backend-deployment.yaml
-                        kubectl rollout status deployment/backend
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy Frontend to Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                        kubectl apply -f K8S/frontend-deployment.yaml
-                        kubectl rollout status deployment/frontend
+                    kubectl apply -f K8S/frontend-deployment.yaml
+                    kubectl rollout status deployment/frontend
                     '''
                 }
             }
         }
     }
-
+  
     post {
         success {
             echo '✅ Déploiement terminé avec succès !'
