@@ -44,8 +44,7 @@ pipeline {
 mvn clean verify sonar:sonar \
   -Dsonar.projectKey=backend \
   -Dsonar.host.url=http://13.38.91.176:9000 \
-  -Dsonar.login=sqp_d25b3453676829bb796cfa9736d360e9a61d7e27
-  -Dsonar.projectName=backend
+-Dsonar.projectName=backend
                           
                         '''
                     }
