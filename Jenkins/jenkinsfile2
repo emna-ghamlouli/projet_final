@@ -13,7 +13,7 @@ pipeline {
 
     stages {
 
-        stage('Build Backend') {
+                stage('Build Backend') {
             steps {
                 dir('demo') {
                     sh 'chmod +x mvnw'
@@ -32,6 +32,16 @@ pipeline {
                               -Dsonar.host.url=http://13.38.91.176:9000 \
                               -Dsonar.login=sqp_d19059690ae2a75ad900cec356f012a8a07a57b7
                         '''
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    script {
+                        waitForQualityGate abortPipeline: true
                     }
                 }
             }
