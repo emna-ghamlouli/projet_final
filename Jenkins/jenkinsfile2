@@ -27,8 +27,9 @@ pipeline {
                 dir('demo') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                              mvnw clean verify sonar:sonar \
-                              -Dsonar.projectKey=backend
+                        chmod +x mvnw
+  ./mvnw clean verify sonar:sonar \
+  -Dsonar.projectKey=backend
     
                         '''
                     }
