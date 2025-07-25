@@ -28,7 +28,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
                             ./mvnw clean verify sonar:sonar \
-                              -Dsonar.projectKey=backend \
+                              -Dsonar.projectKey=backend
     
                         '''
                     }
