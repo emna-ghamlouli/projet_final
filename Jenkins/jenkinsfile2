@@ -63,7 +63,7 @@ pipeline {
                         sh '''
                            npx sonar-scanner \
   -Dsonar.projectKey=frontend \
-  -Dsonar.sources=.
+  -Dsonar.sources=. 
                         '''
                     }
                 }
