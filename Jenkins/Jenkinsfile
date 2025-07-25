@@ -12,8 +12,8 @@ pipeline {
     }
 
     stages {
-    stage('Build') {
-            parallel {
+   stage('Build') {
+    parallel {
         stage('Build Backend') {
             steps {
                 dir('demo') {
@@ -22,7 +22,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -31,7 +30,8 @@ pipeline {
                 }
             }
         }
- } }
+    }
+}
 
         stage('Deploy MySQL to K8s') {
             steps {
@@ -62,7 +62,7 @@ stage('Docker Build&Push') {
 }
 
  stage('Deploy') {
-            parallel {
+    parallel {
         stage('Deploy Backend to K8s') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
@@ -73,7 +73,6 @@ stage('Docker Build&Push') {
                 }
             }
         }
-
         stage('Deploy Frontend to K8s') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
@@ -85,7 +84,7 @@ stage('Docker Build&Push') {
             }
         }
     }
-      } }
+}
 
     post {
         success {
