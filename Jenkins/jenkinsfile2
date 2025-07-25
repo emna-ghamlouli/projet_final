@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'Docker'
-        BACKEND_IMAGE = 'ghamlouli/demo'
-        FRONTEND_IMAGE = 'ghamlouli/frontend'
+        DOCKERHUB_CREDENTIALS = 'Docker'              // ID des credentials Jenkins pour Docker Hub
+        BACKEND_IMAGE = 'ghamlouli/demo'              // Nom de l'image backend
+        FRONTEND_IMAGE = 'ghamlouli/frontend'         // Nom de l'image frontend
     }
 
     tools {
-        nodejs 'NodeJS 18'
+        nodejs 'NodeJS 18'                            // Utilise NodeJS installé via Jenkins
     }
 
     stages {
+
         stage('Build Backend & Frontend') {
             parallel {
                 stage('Build Backend') {
@@ -47,9 +48,9 @@ pipeline {
             }
         }
 
-        stage('Docker Build&Push') {
+        stage('Docker Build & Push') {
             steps {
-                withDockerRegistry(credentialsId: 'Docker', url: '') {
+                withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '') {
                     // Backend
                     sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
                     sh 'docker push ${BACKEND_IMAGE}:latest'
