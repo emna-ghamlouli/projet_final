@@ -46,7 +46,7 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
+        stage('Quality Gate - Backend') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     script {
@@ -69,7 +69,7 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
+        stage('Quality Gate - Frontend') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     script {
