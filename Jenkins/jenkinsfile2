@@ -16,8 +16,8 @@ pipeline {
                 stage('Build Backend') {
             steps {
                 dir('demo') {
-                    sh 'chmod +x mvnw'
-                    sh './mvnw clean package -DskipTests'
+                    sh 'chmod +x mvn'
+                    sh './mvn clean package -DskipTests'
                 }
             }
         }
@@ -27,7 +27,7 @@ pipeline {
                 dir('demo') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            ./mvnw clean verify sonar:sonar \
+                              mvn clean verify sonar:sonar \
                               -Dsonar.projectKey=backend
     
                         '''
