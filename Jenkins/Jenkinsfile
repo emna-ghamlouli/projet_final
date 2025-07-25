@@ -2,17 +2,16 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'Docker'           // ID des credentials Jenkins pour Docker Hub
-        BACKEND_IMAGE = 'ghamlouli/demo'           // Nom de l'image backend
-        FRONTEND_IMAGE = 'ghamlouli/frontend'      // Nom de l'image frontend
+        DOCKERHUB_CREDENTIALS = 'Docker'
+        BACKEND_IMAGE = 'ghamlouli/demo'
+        FRONTEND_IMAGE = 'ghamlouli/frontend'
     }
 
     tools {
-        nodejs 'NodeJS 18'                         // Utilise NodeJS installé via Jenkins
+        nodejs 'NodeJS 18'
     }
 
     stages {
-
         stage('Build') {
             parallel {
                 stage('Build Backend') {
@@ -66,33 +65,4 @@ pipeline {
                     steps {
                         withKubeConfig([credentialsId: 'kubernetes']) {
                             sh '''
-                            kubectl apply -f k8s/backend-deployment.yaml
-                            kubectl rollout status deployment/backend
-                            '''
-                        }
-                    }
-                }
-
-                stage('Deploy Frontend') {
-                    steps {
-                        withKubeConfig([credentialsId: 'kubernetes']) {
-                            sh '''
-                            kubectl apply -f k8s/frontend-deployment.yaml
-                            kubectl rollout status deployment/frontend
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Déploiement terminé avec succès !'
-        }
-        failure {
-            echo '❌ Échec du pipeline !'
-        }
-    }
-}
+                            k
