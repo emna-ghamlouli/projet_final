@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = 'ghamlouli/compare-appf25'
+        IMAGE_TAG = "${BUILD_NUMBER}" // ou "${GIT_COMMIT.take(7)}"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package -DskipTests=true'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Sonar_Scan') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=projet4 \
+                        -Dsonar.projectName=projet4
+                    '''
+                }
+            }
+        }
+
+        stage('Quality_Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        waitForQualityGate(abortPipeline: true)
+                    }
+                }
+            }
+        }
+
+        stage('Nexus_Publish') {
+            steps {
+                nexusArtifactUploader artifacts: [
+                    [
+                        artifactId: 'numeric',
+                        classifier: '',
+                        file: 'target/numeric-0.0.1.jar',
+                        type: 'jar'
+                    ]
+                ],
+                credentialsId: 'nexus',
+                groupId: 'com.devops',
+                nexusUrl: '13.36.244.82:8081',
+                nexusVersion: 'nexus3',
+                protocol: 'http',
+                repository: 'compare-service',
+                version: "0.0.1.${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Docker_Build') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+            }
+        }
+
+        stage('Docker_Push') {
+            steps {
+                withDockerRegistry(credentialsId: 'Docker', url: '') {
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${IMAGE_NAME}:latest"
+
+                    sh 'docker image prune -f'
+                    sh '''
+                        docker images --filter=reference='ghamlouli/compare-appf25*' --format '{{.ID}} {{.Repository}}:{{.Tag}}' \
+                        | awk '{print $1}' \
+                        | xargs -r docker rmi -f
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy_Kubernetes') {
+            steps {
+                script {
+                    withKubeConfig(credentialsId: 'kubernetes') {
+                        sh '''
+                            cp compare-app-V2.yaml.template compare-app-V2.yaml
+                            sed -i "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" compare-app-V2.yaml
+                            kubectl apply -f compare-app-V2.yaml
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            mail to: 'emnaghamlouli1995@gmail.com',
+                 subject: "✅ [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER} succeeded",
+                 body: "Le build ${env.BUILD_NUMBER} du job ${env.JOB_NAME} s'est terminé avec succès.\n\nLien : ${env.BUILD_URL}"
+        }
+        failure {
+            mail to: 'emnaghamlouli1995@gmail.com',
+                 subject: "❌ [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER} failed",
+                 body: "Le build ${env.BUILD_NUMBER} du job ${env.JOB_NAME} a échoué.\n\nLien : ${env.BUILD_URL}"
+        }
+        always {
+            echo 'Notification e-mail envoyée.'
+        }
+    }
+}
