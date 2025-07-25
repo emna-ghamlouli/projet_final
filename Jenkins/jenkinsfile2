@@ -61,7 +61,7 @@ pipeline {
                 dir('frontend') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                           sonar-scanner \
+                           npx sonar-scanner \
   -Dsonar.projectKey=frontend \
   -Dsonar.sources=.
                         '''
