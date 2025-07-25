@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'Docker'
-        BACKEND_IMAGE = 'ghamlouli/demo'
-        FRONTEND_IMAGE = 'ghamlouli/frontend'
+        DOCKERHUB_CREDENTIALS = 'Docker'               // ID des credentials Docker Hub
+        BACKEND_IMAGE = 'ghamlouli/demo'               // Image backend
+        FRONTEND_IMAGE = 'ghamlouli/frontend'          // Image frontend
     }
 
     tools {
-        nodejs 'NodeJS 18'
-        maven 'Maven 3.9.6'   // adapte ce nom à celui configuré dans Jenkins
+        nodejs 'NodeJS 18'                             // NodeJS configuré dans Jenkins
+
     }
 
     stages {
@@ -36,12 +36,12 @@ pipeline {
             }
         }
 
-        stage('Sonar_Scan_backend') {
+        stage('SonarQube Scan - Backend') {
             steps {
                 dir('demo') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            mvn clean verify sonar:sonar \
+                            ./mvnw clean verify sonar:sonar \
                             -Dsonar.projectKey=backend \
                             -Dsonar.projectName=backend
                         '''
@@ -50,42 +50,23 @@ pipeline {
             }
         }
 
-        // ❗ Décommente ceci si tu veux analyser aussi le frontend avec SonarQube
-        /*
-        stage('Sonar_Scan_frontend') {
-            steps {
-                dir('frontend') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh '''
-                            sonar-scanner \
-                            -Dsonar.projectKey=frontend \
-                            -Dsonar.projectName=frontend \
-                            -Dsonar.sources=. \
-                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                        '''
-                    }
-                }
-            }
-        }
-        */
-
-        stage('Quality_Gate_backend') {
+        stage('Quality Gate - Backend') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
-                        waitForQualityGate(abortPipeline: true)
+                        waitForQualityGate abortPipeline: true
                     }
                 }
             }
         }
 
-        stage('Nexus_Publish_backend') {
+        stage('Publish to Nexus - Backend') {
             steps {
                 dir('demo') {
                     nexusArtifactUploader artifacts: [[
                         artifactId: 'demo',
                         classifier: '',
-                        file: 'target/demo-0.0.1-SNAPSHOT.jar',
+                        file: 'target/*.jar',
                         type: 'jar'
                     ]],
                     credentialsId: 'nexus',
@@ -99,7 +80,7 @@ pipeline {
             }
         }
 
-        stage('Deploy MySQL to K8s') {
+        stage('Deploy MySQL to Kubernetes') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
@@ -112,19 +93,21 @@ pipeline {
             }
         }
 
-        stage('Docker Build&Push') {
+        stage('Docker Build & Push') {
             steps {
                 withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '') {
+                    // Build & Push Backend
                     sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
                     sh 'docker push ${BACKEND_IMAGE}:latest'
 
+                    // Build & Push Frontend
                     sh 'docker build -t ${FRONTEND_IMAGE}:latest ./frontend'
                     sh 'docker push ${FRONTEND_IMAGE}:latest'
                 }
             }
         }
 
-        stage('Deploy Backend to K8s') {
+        stage('Deploy Backend to Kubernetes') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
@@ -135,7 +118,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Frontend to K8s') {
+        stage('Deploy Frontend to Kubernetes') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh '''
