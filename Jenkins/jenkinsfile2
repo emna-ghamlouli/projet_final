@@ -82,24 +82,24 @@ pipeline {
         }
 
         stage('Nexus_Publish_backend') {
-            steps {
-                nexusArtifactUploader artifacts: [
-                    [
-                        artifactId: 'demo',
-                        classifier: '',
-                        file: 'target/demo-0.0.1.jar',
-                        type: 'jar'
-                    ]
-                ],
-                credentialsId: 'nexus',
-                groupId: 'com.example',
-                nexusUrl: '13.38.91.176:8081',
-                nexusVersion: 'nexus3',
-                protocol: 'http',
-                repository: 'backend',
-                version: "0.0.1.${BUILD_NUMBER}"
-            }
-        }
+    steps {
+        nexusArtifactUploader artifacts: [
+            [
+                artifactId: 'demo',
+                classifier: '',
+                file: 'target/demo-0.0.1-SNAPSHOT.jar',
+                type: 'jar'
+            ]
+        ],
+        credentialsId: 'nexus',
+        groupId: 'com.example',
+        nexusUrl: '13.38.91.176:8081',
+        nexusVersion: 'nexus3',
+        protocol: 'http',
+        repository: 'backend',
+        version: "0.0.1-${BUILD_NUMBER}"
+    }
+}
 
         stage('Deploy MySQL to K8s') {
             steps {
