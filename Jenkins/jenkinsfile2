@@ -58,13 +58,11 @@ pipeline {
       stage('SonarQube Scan - Frontend') {
     steps {
         dir('frontend') {
-            withSonarQubeEnv('SonarQube') {
+            withSonarQubeEnv('SonarQube1') {
                 sh '''
 sonar-scanner \
   -Dsonar.projectKey=frontend \
-  -Dsonar.sources=. \
-  -Dsonar.host.url=http://13.38.91.176:9000 \
-  -Dsonar.login=sqp_ce058ecffad3a026ccccd6477fa0caf493dd780a
+  -Dsonar.sources=. 
                 '''
             }
         }
