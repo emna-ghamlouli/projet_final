@@ -108,30 +108,38 @@ pipeline {
         }
 stage('Nexus_Publish_Frontend') {
     steps {
-        script {
-            sh '''
-                cd dist
-                zip -r ../frontend-1.0.0.zip frontend
-            '''
-            nexusArtifactUploader(
-                nexusVersion: 'nexus3',
-                protocol: 'http',
-                nexusUrl: '13.38.91.176:8081',
-                groupId: 'com.emna.frontend',
-                version: '1.0.0',
-                repository: 'raw-repo',
-                credentialsId: 'nexus',
-                artifacts: [[
-                    artifactId: 'frontend',
-                    classifier: '',
-                    file: 'frontend-1.0.0.zip',
-                    type: 'zip'
-                ]]
-            )
+        dir('frontend') {
+            script {
+                // Vérifier que le build a bien généré dist/
+                sh '''
+                    if [ ! -d "dist" ]; then
+                        echo "Erreur : le dossier 'dist/' est manquant. Le build Angular a-t-il échoué ?"
+                        exit 1
+                    fi
+
+                    cd dist
+                    zip -r ../frontend-1.0.0.zip *
+                '''
+
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: '13.38.91.176:8081',
+                    groupId: 'com.emna.frontend',
+                    version: '1.0.0',
+                    repository: 'frontend', 
+                    credentialsId: 'nexus',
+                    artifacts: [[
+                        artifactId: 'frontend',
+                        classifier: '',
+                        file: 'frontend-1.0.0.zip',
+                        type: 'zip'
+                    ]]
+                )
+            }
         }
     }
 }
-
         stage('Deploy MySQL to K8s') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
