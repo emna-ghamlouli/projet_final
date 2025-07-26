@@ -39,7 +39,7 @@ mopipeline {
                         sh '''
                             chmod +x mvnw
                             ./mvnw clean verify sonar:sonar \
-                                -Dsonar.projectKey=demo
+                               -Dsonar.projectKey=demo
                         '''
                     }
                 }
