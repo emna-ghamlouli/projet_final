@@ -61,10 +61,9 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
-                                npx sonar-scanner \
-                                  -Dsonar.projectKey=frontend \
-                                  -Dsonar.sources=. \
-                                  -Dsonar.host.url=http://13.38.91.176:9000
+                            sonar-scanner \
+                              -Dsonar.projectKey=frontend \
+                              -Dsonar.sources=.
                             '''
                         }
                     }
