@@ -59,13 +59,13 @@ pipeline {
             steps {
                 dir('frontend') {
                     withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        
                             sh '''
                             sonar-scanner \
                               -Dsonar.projectKey=frontend \
                               -Dsonar.sources=.
                             '''
-                        }
+                        
                     }
                 }
             }
