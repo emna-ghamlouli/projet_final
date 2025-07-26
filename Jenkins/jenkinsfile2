@@ -81,29 +81,31 @@ pipeline {
             }
         }
 
-stage('Nexus_Publish_Frontend') {
-    steps {
-        dir('frontend') {
-            sh 'zip -r frontend-1.0.0.zip dist'
-
-            nexusArtifactUploader(
-                nexusVersion: 'nexus3',
-                protocol: 'http',
-                nexusUrl: '13.38.91.176:8081',
-                groupId: 'com.emna.frontend',
-                version: '1.0.0',
-                repository: 'frontend-zip', // Assure-toi que ce repo existe dans Nexus
-                credentialsId: 'nexus',
-                artifacts: [[
-                    artifactId: 'frontend',
-                    classifier: '',
-                    file: 'frontend-1.0.0.zip',
-                    type: 'zip'
-                ]]
-            )
+    stage('Nexus_Publish_backend') {
+            steps {
+                dir('demo') {
+                    script {
+                        nexusArtifactUploader(
+                            nexusVersion: 'nexus3',
+                            protocol: 'http',
+                            nexusUrl: '13.38.91.176:8081',
+                            groupId: 'com.example',
+                            version: "0.0.1-SNAPSHOT-${BUILD_NUMBER}",
+                            repository: 'backend',
+                            credentialsId: 'nexus',
+                            artifacts: [
+                                [
+                                    artifactId: 'demo',
+                                    classifier: '',
+                                    file: 'target/demo-0.0.1-SNAPSHOT.jar',
+                                    type: 'jar'
+                                ]
+                            ]
+                        )
+                    }
+                }
+            }
         }
-    }
-}
 stage('Nexus_Publish_Frontend') {
     steps {
         dir('frontend') {
