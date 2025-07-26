@@ -12,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Build Backend') {
             steps {
                 dir('demo') {
@@ -38,7 +37,7 @@ pipeline {
                         sh '''
                             chmod +x mvnw
                             ./mvnw clean verify sonar:sonar \
-                                -Dsonar.projectKey=backend
+                              -Dsonar.projectKey=demo
                         '''
                     }
                 }
@@ -59,13 +58,12 @@ pipeline {
             steps {
                 dir('frontend') {
                     withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh '''
+                        sh '''
                             sonar-scanner \
                               -Dsonar.projectKey=frontend \
-                              -Dsonar.sources=.
-                            '''
-                        }
+                              -Dsonar.sources=. \
+                              -Dsonar.login=sqp_d19059690ae2a75ad900cec356f012a8a07a57b7
+                        '''
                     }
                 }
             }
@@ -94,7 +92,7 @@ pipeline {
             }
         }
 
-        stage('Docker Build&Push') {
+        stage('Docker Build & Push') {
             steps {
                 withDockerRegistry(credentialsId: 'Docker', url: '') {
                     sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
