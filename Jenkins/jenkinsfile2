@@ -59,7 +59,7 @@ pipeline {
         stage('SonarQube Scan - Frontend') {
             steps {
                 dir('frontend') {
-                    withSonarQubeEnv('SonarQube1') { // ✅ Assure-toi que ce nom existe dans Jenkins
+                    withSonarQubeEnv('SonarQube1') { 
                         sh '''
                             npx sonar-scanner \
                                 -Dsonar.projectKey=frontend \
