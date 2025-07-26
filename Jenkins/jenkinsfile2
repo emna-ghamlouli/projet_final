@@ -60,11 +60,11 @@ pipeline {
         dir('frontend') {
             withSonarQubeEnv('SonarQube') {
                 sh '''
-             sonar-scanner \
+sonar-scanner \
   -Dsonar.projectKey=frontend \
   -Dsonar.sources=. \
   -Dsonar.host.url=http://13.38.91.176:9000 \
-  -Dsonar.login=sqp_13f4d30cb80e3e23b1fb2cac57d03cb47cd1f4da
+  -Dsonar.login=sqp_ce058ecffad3a026ccccd6477fa0caf493dd780a
                 '''
             }
         }
