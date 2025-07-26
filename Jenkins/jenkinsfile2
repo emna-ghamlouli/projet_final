@@ -82,24 +82,30 @@ pipeline {
         }
 
         stage('Nexus_Publish_backend') {
-    steps {
-        nexusArtifactUploader artifacts: [
-          
-                artifactId: 'demo',
-                classifier: '',
-                file: 'target/demo-0.0.1-SNAPSHOT.jar',
-                type: 'jar'
-            ]
-        ],
-        credentialsId: 'nexus',
-        groupId: 'com.example',
-        nexusUrl: '13.38.91.176:8081',
-        nexusVersion: 'nexus3',
-        protocol: 'http',
-        repository: 'backend',
-        version: "0.0.1-SNAPSHOT-${BUILD_NUMBER}"
-    }
-}
+            steps {
+                dir('demo') {
+                    script {
+                        nexusArtifactUploader(
+                            nexusVersion: 'nexus3',
+                            protocol: 'http',
+                            nexusUrl: '13.38.91.176:8081',
+                            groupId: 'com.example',
+                            version: "0.0.1-SNAPSHOT-${BUILD_NUMBER}",
+                            repository: 'backend',
+                            credentialsId: 'nexus',
+                            artifacts: [
+                                [
+                                    artifactId: 'demo',
+                                    classifier: '',
+                                    file: 'target/demo-0.0.1-SNAPSHOT.jar',
+                                    type: 'jar'
+                                ]
+                            ]
+                        )
+                    }
+                }
+            }
+        }
 
         stage('Deploy MySQL to K8s') {
             steps {
@@ -114,10 +120,10 @@ pipeline {
             }
         }
 
-        stage('Docker Build&Push') {
+        stage('Docker Build & Push') {
             steps {
-                withDockerRegistry(credentialsId: 'Docker', url: '') {
- sh 'docker system prune -a --volumes -f'
+                withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '') {
+                    sh 'docker system prune -a --volumes -f'
                     sh 'docker build -t ${BACKEND_IMAGE}:latest ./demo'
                     sh 'docker push ${BACKEND_IMAGE}:latest'
                     sh 'docker build -t ${FRONTEND_IMAGE}:latest ./frontend'
