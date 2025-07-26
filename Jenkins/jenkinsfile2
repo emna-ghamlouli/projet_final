@@ -127,7 +127,7 @@ stage('Nexus_Publish_Frontend') {
                     nexusUrl: '13.38.91.176:8081',
                     groupId: 'com.emna.frontend',
                     version: '1.0.0',
-                    repository: 'frontend',
+                    repository: 'frontend', // 💡 changer 'raw-repo' vers le bon nom
                     credentialsId: 'nexus',
                     artifacts: [[
                         artifactId: 'frontend',
