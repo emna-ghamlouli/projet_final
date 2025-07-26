@@ -1,4 +1,4 @@
-pipeline {
+mopipeline {
     agent any
 
     environment {
@@ -39,7 +39,7 @@ pipeline {
                         sh '''
                             chmod +x mvnw
                             ./mvnw clean verify sonar:sonar \
-                                -Dsonar.projectKey=backend
+                                -Dsonar.projectKey=demo
                         '''
                     }
                 }
