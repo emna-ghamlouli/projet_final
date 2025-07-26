@@ -110,13 +110,7 @@ stage('Nexus_Publish_Frontend') {
     steps {
         dir('frontend') {
             script {
-                // Vérifier que le build a bien généré dist/
                 sh '''
-                    if [ ! -d "dist" ]; then
-                        echo "Erreur : le dossier 'dist/' est manquant. Le build Angular a-t-il échoué ?"
-                        exit 1
-                    fi
-
                     cd dist
                     zip -r ../frontend-1.0.0.zip *
                 '''
