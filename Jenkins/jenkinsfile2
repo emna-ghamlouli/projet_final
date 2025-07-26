@@ -106,6 +106,36 @@ pipeline {
                 }
             }
         }
+stage('Nexus_Publish_Frontend') {
+    steps {
+        dir('frontend') {
+            script {
+                // Récupérer le nom du dossier généré dans dist/
+                def buildDir = sh(script: "ls dist", returnStdout: true).trim()
+
+                // Zipper le résultat
+                sh "cd dist && zip -r ../frontend-${buildDir}.zip ${buildDir}"
+
+                // Upload vers Nexus
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: '13.38.91.176:8081',
+                    groupId: 'com.emna.frontend',
+                    version: '1.0.0',
+                    repository: 'raw-repo',
+                    credentialsId: 'nexus',
+                    artifacts: [[
+                        artifactId: 'frontend',
+                        classifier: '',
+                        file: "frontend-${buildDir}.zip",
+                        type: 'zip'
+                    ]]
+                )
+            }
+        }
+    }
+}
 
         stage('Deploy MySQL to K8s') {
             steps {
