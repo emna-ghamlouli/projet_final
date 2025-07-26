@@ -38,8 +38,8 @@ pipeline {
                         sh '''
                             chmod +x mvnw
                             ./mvnw clean verify sonar:sonar \
-                                -Dsonar.projectKey=backend
--Dsonar.projectName=backend
+                                -Dsonar.projectKey=backend \
+                                -Dsonar.projectName=backend
                         '''
                     }
                 }
@@ -56,20 +56,21 @@ pipeline {
             }
         }
 
-      stage('SonarQube Scan - Frontend') {
-    steps {
-        dir('frontend') {
-            withSonarQubeEnv('SonarQube1') {
-                sh '''
-sonar-scanner \
-  -Dsonar.projectKey=frontend \
-  -Dsonar.sources=. \ 
--Dsonar.projectName=backend
-                '''
+        stage('SonarQube Scan - Frontend') {
+            steps {
+                dir('frontend') {
+                    withSonarQubeEnv('SonarQube1') { // ✅ Assure-toi que ce nom existe dans Jenkins
+                        sh '''
+                            npx sonar-scanner \
+                                -Dsonar.projectKey=frontend \
+                                -Dsonar.projectName=frontend \
+                                -Dsonar.sources=.
+                        '''
+                    }
+                }
             }
         }
-    }
-}
+
         stage('Quality Gate - Frontend') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
