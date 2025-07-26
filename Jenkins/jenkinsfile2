@@ -39,6 +39,7 @@ pipeline {
                             chmod +x mvnw
                             ./mvnw clean verify sonar:sonar \
                                 -Dsonar.projectKey=backend
+-Dsonar.projectName=backend
                         '''
                     }
                 }
@@ -62,7 +63,8 @@ pipeline {
                 sh '''
 sonar-scanner \
   -Dsonar.projectKey=frontend \
-  -Dsonar.sources=. 
+  -Dsonar.sources=. \ 
+-Dsonar.projectName=backend
                 '''
             }
         }
