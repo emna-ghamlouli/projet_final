@@ -5,6 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = 'Docker'
         BACKEND_IMAGE = 'ghamlouli/demo'
         FRONTEND_IMAGE = 'ghamlouli/frontend'
+        def backendTag = "1.0.${BUILD_NUMBER}"
+        def frontendTag = "1.0.${BUILD_NUMBER}"
     }
 
     tools {
@@ -158,11 +160,7 @@ stage('Docker Build & Push') {
     steps {
         withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '') {
             script {
-                // Tags dynamiques
-                def backendTag = "1.0.${BUILD_NUMBER}"
-                def frontendTag = "1.0.${BUILD_NUMBER}"
-
-                sh "docker build -t ${BACKEND_IMAGE}:${backendTag} -t ${BACKEND_IMAGE}:latest ./demo"
+                 sh "docker build -t ${BACKEND_IMAGE}:${backendTag} -t ${BACKEND_IMAGE}:latest ./demo"
                 sh "docker push ${BACKEND_IMAGE}:${backendTag}"
                 sh "docker push ${BACKEND_IMAGE}:latest"
                
