@@ -110,7 +110,7 @@ stage('Nexus_Publish_Frontend') {
             steps {
                 dir('frontend') {
                     sh '''
-                        test -d dist || (echo "❌ Erreur : le dossier dist/ est manquant." && exit 1)
+                        test -d dist || (echo " Erreur : le dossier dist/ est manquant." && exit 1)
                         zip -r frontend-1.0.0.zip dist
                     '''
 
