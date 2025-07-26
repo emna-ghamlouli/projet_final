@@ -107,19 +107,17 @@ stage('Nexus_Publish_Frontend') {
 stage('Nexus_Publish_Frontend') {
     steps {
         dir('frontend') {
-            script {
-                sh '''
-                    cd dist
-                    zip -r ../frontend-1.0.0.zip *
-                '''
+            sh 'test -d dist || (echo "Erreur : le dossier dist/ est manquant." && exit 1)'
+            sh 'zip -r frontend-1.0.0.zip dist'
 
+            script {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: '13.38.91.176:8081',
                     groupId: 'com.emna.frontend',
                     version: '1.0.0',
-                    repository: 'frontend', 
+                    repository: 'frontend-zip',
                     credentialsId: 'nexus',
                     artifacts: [[
                         artifactId: 'frontend',
