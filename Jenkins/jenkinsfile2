@@ -81,7 +81,7 @@ pipeline {
             }
         }
 
-       stage('Nexus_Publish_Frontend') {
+stage('Nexus_Publish_Frontend') {
     steps {
         dir('frontend') {
             sh 'zip -r frontend-1.0.0.zip dist'
