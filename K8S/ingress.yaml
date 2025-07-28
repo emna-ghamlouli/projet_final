@@ -10,8 +10,8 @@ spec:
     - host: backend.customer
       http:
         paths:
-          - path: /customers(/|$)(.*)
-            pathType: Prefix
+- path: /customers
+  pathType: Prefix
             backend:
               service:
                 name: backend
