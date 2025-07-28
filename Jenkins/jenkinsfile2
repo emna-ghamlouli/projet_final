@@ -1,24 +1,36 @@
-        stage('Deploy Frontend to K8s') {
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = 'Docker'
+        BACKEND_IMAGE = 'ghamlouli/demo'
+        FRONTEND_IMAGE = 'ghamlouli/frontend'
+    }
+
+    tools {
+        nodejs 'NodeJS 18'
+    }
+
+    stages {
+        stage('Define Tags') {
             steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                        kubectl apply -f K8S/frontend-deployment.yaml
-                        kubectl rollout status deployment/frontend
-                    '''
+                script {
+                    backendTag = "1.0.${env.BUILD_NUMBER}"
+                    frontendTag = "1.0.${env.BUILD_NUMBER}"
                 }
             }
         }
 
+        // ... (tous tes autres stages ici)
+
         stage('Apply Ingress') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh '''
-                        kubectl apply -f ingress.yaml
-                    '''
+                    sh 'kubectl apply -f ingress.yaml'
                 }
             }
         }
-    } // <<< fin du bloc stages
+    } // ✅ fermeture correcte du bloc `stages`
 
     post {
         success {
