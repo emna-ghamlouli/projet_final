@@ -9,7 +9,6 @@
             }
         }
 
-        // ✅ On déplace ici le stage "Apply Ingress"
         stage('Apply Ingress') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
