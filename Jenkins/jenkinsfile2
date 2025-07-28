@@ -194,7 +194,14 @@ stage('Nexus_Publish_Frontend') {
                 }
             }
         }
-    } // Fin du bloc stages
+    }
+ stage('Apply Ingress') {
+            steps {
+                withKubeConfig([credentialsId: 'kubernetes']) {
+                    sh 'kubectl apply -f ingress.yaml'
+                }
+            }
+        }
 
     post {
         success {
