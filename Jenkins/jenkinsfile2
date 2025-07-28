@@ -201,10 +201,17 @@ stage('Docker Build & Push') {
 
     post {
         success {
-            echo '✅ Déploiement terminé avec succès !'
+            mail to: 'emnaghamlouli1995@gmail.com',
+                 subject: "✅ [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER} succeeded",
+                 body: "Le build ${env.BUILD_NUMBER} du job ${env.JOB_NAME} s'est terminé avec succès.\n\nLien : ${env.BUILD_URL}"
         }
         failure {
-            echo '❌ Échec du pipeline !'
+            mail to: 'emnaghamlouli1995@gmail.com',
+                 subject: "❌ [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER} failed",
+                 body: "Le build ${env.BUILD_NUMBER} du job ${env.JOB_NAME} a échoué.\n\nLien : ${env.BUILD_URL}"
+        }
+        always {
+            echo 'Notification e-mail envoyée.'
         }
     }
 }
