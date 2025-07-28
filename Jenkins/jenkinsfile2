@@ -198,6 +198,16 @@ stage('Docker Build & Push') {
             }
         }
     }
+stage('Apply Ingress') {
+    steps {
+        withKubeConfig([credentialsId: 'kubernetes']) {
+            sh '''
+                kubectl apply -f ingress.yaml
+            '''
+        }
+    }
+}
+
 
     post {
         success {
