@@ -105,41 +105,42 @@ pipeline {
                 }
             }
         }
-stage('Nexus_Publish_Frontend') {
-    steps {
-        dir('frontend') {
-            script {
-                def FRONTEND_VERSION = "1.0.${BUILD_NUMBER}"
 
-                sh """
-                    if [ ! -d "dist" ]; then
-                        echo "Erreur : le dossier 'dist/' est manquant. Le build Angular a-t-il échoué ?"
-                        exit 1
-                    fi
+        stage('Nexus_Publish_Frontend') {
+            steps {
+                dir('frontend') {
+                    script {
+                        def FRONTEND_VERSION = "1.0.${BUILD_NUMBER}"
 
-                    cd dist
-                    zip -r ../frontend-${FRONTEND_VERSION}.zip *
-                """
+                        sh """
+                            if [ ! -d "dist" ]; then
+                                echo "Erreur : le dossier 'dist/' est manquant. Le build Angular a-t-il échoué ?"
+                                exit 1
+                            fi
 
-                nexusArtifactUploader(
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    nexusUrl: '15.188.246.53:8081',
-                    groupId: 'com.emna.frontend',
-                    version: "${FRONTEND_VERSION}",
-                    repository: 'frontend',
-                    credentialsId: 'nexus',
-                    artifacts: [[
-                        artifactId: 'frontend',
-                        classifier: '',
-                        file: "frontend-${FRONTEND_VERSION}.zip",
-                        type: 'zip'
-                    ]]
-                )
+                            cd dist
+                            zip -r ../frontend-${FRONTEND_VERSION}.zip *
+                        """
+
+                        nexusArtifactUploader(
+                            nexusVersion: 'nexus3',
+                            protocol: 'http',
+                            nexusUrl: '15.188.246.53:8081',
+                            groupId: 'com.emna.frontend',
+                            version: "${FRONTEND_VERSION}",
+                            repository: 'frontend',
+                            credentialsId: 'nexus',
+                            artifacts: [[
+                                artifactId: 'frontend',
+                                classifier: '',
+                                file: "frontend-${FRONTEND_VERSION}.zip",
+                                type: 'zip'
+                            ]]
+                        )
+                    }
+                }
             }
         }
-    }
-}
 
         stage('Deploy MySQL to K8s') {
             steps {
@@ -194,8 +195,8 @@ stage('Nexus_Publish_Frontend') {
                 }
             }
         }
-    }
- stage('Apply Ingress') {
+
+        stage('Apply Ingress') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
                     sh 'kubectl apply -f ingress.yaml'
@@ -219,4 +220,4 @@ stage('Nexus_Publish_Frontend') {
             echo 'Notification e-mail envoyée.'
         }
     }
-} 
+}
