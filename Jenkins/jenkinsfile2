@@ -196,15 +196,6 @@ pipeline {
             }
         }
 
-        stage('Apply Ingress') {
-            steps {
-                withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh 'kubectl apply -f ingress.yaml'
-                }
-            }
-        }
-    } // ← ✅ fermeture correcte du bloc `stages`
-
     post {
         success {
             mail to: 'emnaghamlouli1995@gmail.com',
