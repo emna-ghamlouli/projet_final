@@ -195,6 +195,7 @@ pipeline {
                 }
             }
         }
+    } // Fin du bloc stages
 
     post {
         success {
@@ -211,3 +212,4 @@ pipeline {
             echo 'Notification e-mail envoyée.'
         }
     }
+} 
