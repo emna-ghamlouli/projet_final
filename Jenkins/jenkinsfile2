@@ -199,7 +199,7 @@ pipeline {
         stage('Apply Ingress') {
             steps {
                 withKubeConfig([credentialsId: 'kubernetes']) {
-                    sh 'kubectl apply -f ingress.yaml'
+                    sh 'kubectl apply -f K8S/ingress.yaml'
                 }
             }
         }
