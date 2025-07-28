@@ -3,23 +3,20 @@ kind: Ingress
 metadata:
   name: compare-app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-  labels:
-    name: compare-app-ingress
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - host: backend.customer
       http:
         paths:
-          - path: /
+          - path: /customers(/|$)(.*)
             pathType: Prefix
             backend:
               service:
                 name: backend
                 port:
                   number: 80
-
     - host: frontend.customer
       http:
         paths:
@@ -30,4 +27,3 @@ spec:
                 name: frontend
                 port:
                   number: 80
-
