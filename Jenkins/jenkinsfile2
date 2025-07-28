@@ -211,4 +211,3 @@ pipeline {
             echo 'Notification e-mail envoyée.'
         }
     }
-}}
