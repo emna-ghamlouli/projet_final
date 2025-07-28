@@ -4,7 +4,10 @@ metadata:
   name: compare-app-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+  labels:
+    name: compare-app-ingress
 spec:
+  ingressClassName: nginx
   rules:
     - host: backend.customer
       http:
