@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: compare-app-ingress
+    annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   rules:
@@ -25,3 +27,4 @@ spec:
                 name: frontend
                 port:
                   number: 80
+                  apiVersion: networking.k8s.io/v1
