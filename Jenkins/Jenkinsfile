@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'Docker'            // ID des credentials Jenkins pour Docker Hub
-        BACKEND_IMAGE = 'ghamlouli/demo'           // Nom de l'image backend
-        FRONTEND_IMAGE = 'ghamlouli/frontend'     // Nom de l'image frontend
+        DOCKERHUB_CREDENTIALS = 'Docker'           
+        BACKEND_IMAGE = 'ghamlouli/demo'           
+        FRONTEND_IMAGE = 'ghamlouli/frontend'    
     }
 
     tools {
