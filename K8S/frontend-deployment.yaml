@@ -16,7 +16,7 @@ spec:
         - name: frontend
           image: ghamlouli/frontend:latest
           ports:
-            - containerPort: 80  # Ce que ton image expose
+            - containerPort: 80  
           imagePullPolicy: Always
 ---
 apiVersion: v1
