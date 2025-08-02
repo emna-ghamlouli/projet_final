@@ -106,7 +106,7 @@ pipeline {
                         nexusArtifactUploader(
                             nexusVersion: 'nexus3',
                             protocol: 'http',
-                            nexusUrl: '13.39.233.70:8081',
+                            nexusUrl: '13.38.55.113:8081',
                             groupId: 'com.example',
                             version: "0.0.1-SNAPSHOT-${BUILD_NUMBER}",
                             repository: 'backend',
@@ -142,7 +142,7 @@ pipeline {
                         nexusArtifactUploader(
                             nexusVersion: 'nexus3',
                             protocol: 'http',
-                            nexusUrl: '13.39.233.70:8081',
+                            nexusUrl: '13.38.55.113:8081',
                             groupId: 'com.emna.frontend',
                             version: "${FRONTEND_VERSION}",
                             repository: 'frontend',
