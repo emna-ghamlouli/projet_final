@@ -7,24 +7,24 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: frontend.devops.com
+    - host: frontend.customer
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend-service
+                name: frontend
                 port:
                   number: 80
 
-    - host: backend.devops.com
+    - host: backend.customer
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: backend-service
+                name: backend
                 port:
                   number: 8080
