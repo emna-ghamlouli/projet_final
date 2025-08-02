@@ -24,7 +24,7 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: frontend
   ports:
@@ -32,4 +32,3 @@ spec:
       protocol: TCP
       port: 80           # Port du service (utilisé dans le cluster)
       targetPort: 80     # Port exposé par le container
-      nodePort: 30000    # Port d'accès externe (via IP du noeud)
