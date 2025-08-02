@@ -14,7 +14,7 @@ export interface Customer {
 
 export class CustomerService {
 
- private apiUrl = 'http://13.37.101.166:30001/customers';
+ private apiUrl = 'http://backend.local/customers';
 
   constructor(private http: HttpClient) {}
 
